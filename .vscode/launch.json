@@ -1,0 +1,26 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Main",
+            "request": "launch",
+            "mainClass": "bank.Main",
+            "projectName": "java_project_6c8833a0"
+        },
+        {
+            "type": "java",
+            "name": "Run Main",
+            "request": "launch",
+            "mainClass": "bank.Main",
+            "projectName": "java_project"
+        },
+        {
+            "type": "java",
+            "name": "Run TestRunner",
+            "request": "launch",
+            "mainClass": "bank.TestRunner",
+            "projectName": "java_project"
+        }
+    ]
+}

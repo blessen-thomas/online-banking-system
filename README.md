@@ -8,13 +8,11 @@ A desktop-based **Online Banking System** developed using **Java Swing**, **JDBC
 
 ### Main Application
 
-> Replace this image after uploading your screenshot to `screenshots/main.png`
 
 ![Main Application](screenshots/main.png)
 
 ### MySQL Database
 
-> Replace this image after uploading your screenshot to `screenshots/database.png`
 
 ![Database](screenshots/database.png)
 

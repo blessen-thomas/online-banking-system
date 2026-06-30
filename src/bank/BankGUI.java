@@ -253,6 +253,10 @@ public class BankGUI extends JFrame {
             txtDisplayArea.setText("Account created successfully for " + name + ".\n");
             updateStatus("\u2713 Account created successfully.", false);
             JOptionPane.showMessageDialog(this, "Account Created successfully.");
+            
+            txtAccountNumber.setText("");
+            txtCustomerName.setText("");
+            txtAmount.setText("");
         } catch (NumberFormatException ex) {
             updateStatus("Invalid numeric values.", true);
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values for Account Number and Amount.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -272,6 +276,9 @@ public class BankGUI extends JFrame {
             txtDisplayArea.setText("Deposited " + currencyFormat.format(amount) + " to account " + accNum + " successfully.\n");
             updateStatus("\u2713 Deposit successful.", false);
             JOptionPane.showMessageDialog(this, "Deposit successful.");
+            
+            txtAccountNumber.setText("");
+            txtAmount.setText("");
         } catch (NumberFormatException ex) {
             updateStatus("Invalid numeric values.", true);
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -291,6 +298,9 @@ public class BankGUI extends JFrame {
             txtDisplayArea.setText("Withdrew " + currencyFormat.format(amount) + " from account " + accNum + " successfully.\n");
             updateStatus("\u2713 Withdrawal successful.", false);
             JOptionPane.showMessageDialog(this, "Withdrawal successful.");
+            
+            txtAccountNumber.setText("");
+            txtAmount.setText("");
         } catch (NumberFormatException ex) {
             updateStatus("Invalid numeric values.", true);
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -316,6 +326,8 @@ public class BankGUI extends JFrame {
             
             txtDisplayArea.setText(sb.toString());
             updateStatus("\u2713 Balance retrieved.", false);
+            
+            txtAccountNumber.setText("");
         } catch (NumberFormatException ex) {
             updateStatus("Invalid Account Number.", true);
             JOptionPane.showMessageDialog(this, "Please enter a valid Account Number.", "Error", JOptionPane.ERROR_MESSAGE);
@@ -348,6 +360,8 @@ public class BankGUI extends JFrame {
             
             txtDisplayArea.setText(sb.toString());
             updateStatus("\u2713 Transaction history loaded.", false);
+            
+            txtAccountNumber.setText("");
         } catch (NumberFormatException ex) {
             updateStatus("Invalid Account Number.", true);
             JOptionPane.showMessageDialog(this, "Please enter a valid Account Number.", "Error", JOptionPane.ERROR_MESSAGE);

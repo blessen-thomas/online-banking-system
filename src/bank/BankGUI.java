@@ -7,6 +7,7 @@ import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -17,8 +18,12 @@ public class BankGUI extends JFrame {
     private JTextField txtAmount;
     private JTextArea txtDisplayArea;
     private JLabel lblStatusTime;
+    private JLabel lblAmount;
+    private JLabel lblStatus;
     
     private BankOperations bankService;
+    private DecimalFormat currencyFormat = new DecimalFormat("₹#,##0.00");
+    private DecimalFormat historyCurrencyFormat = new DecimalFormat("₹#,##0");
 
     public BankGUI() {
         bankService = new BankService();
@@ -37,52 +42,51 @@ public class BankGUI extends JFrame {
         JPanel topContainer = new JPanel(new BorderLayout(15, 15));
         topContainer.setBorder(new EmptyBorder(15, 20, 0, 20));
 
-        // 1. Customer Information Panel (GridBagLayout)
+        // 1. Account Details Panel (GridBagLayout)
         JPanel customerPanel = new JPanel(new GridBagLayout());
         customerPanel.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createTitledBorder(
                     BorderFactory.createEtchedBorder(EtchedBorder.LOWERED), 
-                    "Customer Information", TitledBorder.LEFT, TitledBorder.TOP, titleFont),
+                    "Account Details", TitledBorder.LEFT, TitledBorder.TOP, titleFont),
                 new EmptyBorder(10, 15, 10, 15)
         ));
         
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.fill = GridBagConstraints.HORIZONTAL;
-        gbc.insets = new Insets(10, 15, 10, 15);
-        
-        Dimension fieldSize = new Dimension(200, 32);
+        gbc.insets = new Insets(5, 15, 5, 15);
+        gbc.weightx = 1.0;
         
         JLabel lblAcc = new JLabel("Account Number:");
         lblAcc.setFont(mainFont);
-        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.1;
+        gbc.gridx = 0; gbc.gridy = 0;
         customerPanel.add(lblAcc, gbc);
         
         txtAccountNumber = new JTextField();
         txtAccountNumber.setFont(mainFont);
-        txtAccountNumber.setPreferredSize(fieldSize);
-        gbc.gridx = 1; gbc.gridy = 0; gbc.weightx = 0.4;
+        txtAccountNumber.setPreferredSize(new Dimension(0, 32));
+        gbc.gridy = 1;
         customerPanel.add(txtAccountNumber, gbc);
         
         JLabel lblName = new JLabel("Customer Name:");
         lblName.setFont(mainFont);
-        gbc.gridx = 2; gbc.gridy = 0; gbc.weightx = 0.1;
+        gbc.gridy = 2;
         customerPanel.add(lblName, gbc);
         
         txtCustomerName = new JTextField();
         txtCustomerName.setFont(mainFont);
-        txtCustomerName.setPreferredSize(fieldSize);
-        gbc.gridx = 3; gbc.gridy = 0; gbc.weightx = 0.4;
+        txtCustomerName.setPreferredSize(new Dimension(0, 32));
+        gbc.gridy = 3;
         customerPanel.add(txtCustomerName, gbc);
         
-        JLabel lblAmount = new JLabel("Amount:");
+        lblAmount = new JLabel("Amount:");
         lblAmount.setFont(mainFont);
-        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.1;
+        gbc.gridy = 4;
         customerPanel.add(lblAmount, gbc);
         
         txtAmount = new JTextField();
         txtAmount.setFont(mainFont);
-        txtAmount.setPreferredSize(fieldSize);
-        gbc.gridx = 1; gbc.gridy = 1; gbc.weightx = 0.4;
+        txtAmount.setPreferredSize(new Dimension(0, 32));
+        gbc.gridy = 5;
         customerPanel.add(txtAmount, gbc);
         
         topContainer.add(customerPanel, BorderLayout.NORTH);
@@ -118,6 +122,11 @@ public class BankGUI extends JFrame {
         // 3. Transaction Log Panel (BorderLayout)
         JPanel logPanel = new JPanel(new BorderLayout());
         logPanel.setBorder(new EmptyBorder(0, 20, 10, 20));
+        
+        lblStatus = new JLabel("Status: Ready");
+        lblStatus.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        lblStatus.setBorder(new EmptyBorder(0, 5, 5, 5));
+        logPanel.add(lblStatus, BorderLayout.NORTH);
         
         txtDisplayArea = new JTextArea();
         txtDisplayArea.setFont(new Font("Consolas", Font.PLAIN, 14));
@@ -178,12 +187,52 @@ public class BankGUI extends JFrame {
         return btn;
     }
 
+    private void setMode(String op) {
+        if (op.equals("Create Account")) {
+            txtAccountNumber.setEnabled(true);
+            txtCustomerName.setEnabled(true);
+            txtAmount.setEnabled(true);
+            lblAmount.setText("Initial Deposit:");
+        } else if (op.equals("Deposit")) {
+            txtAccountNumber.setEnabled(true);
+            txtCustomerName.setEnabled(false);
+            txtAmount.setEnabled(true);
+            lblAmount.setText("Deposit Amount:");
+        } else if (op.equals("Withdraw")) {
+            txtAccountNumber.setEnabled(true);
+            txtCustomerName.setEnabled(false);
+            txtAmount.setEnabled(true);
+            lblAmount.setText("Withdrawal Amount:");
+        } else if (op.equals("Balance Enquiry") || op.equals("Transaction History")) {
+            txtAccountNumber.setEnabled(true);
+            txtCustomerName.setEnabled(false);
+            txtAmount.setEnabled(false);
+            lblAmount.setText("Amount:");
+        } else if (op.equals("Clear")) {
+            txtAccountNumber.setEnabled(true);
+            txtCustomerName.setEnabled(true);
+            txtAmount.setEnabled(true);
+            lblAmount.setText("Amount:");
+        }
+    }
+
+    private void updateStatus(String statusText, boolean isError) {
+        lblStatus.setText("Status: " + statusText);
+        if (isError) {
+            lblStatus.setForeground(Color.RED);
+        } else {
+            lblStatus.setForeground(new Color(39, 174, 96)); // Green
+        }
+    }
+
     private void createAccount() {
+        setMode("Create Account");
         try {
             int accNum = Integer.parseInt(txtAccountNumber.getText().trim());
             String name = txtCustomerName.getText().trim();
             
             if (name.isEmpty()) {
+                updateStatus("Customer name cannot be empty.", true);
                 JOptionPane.showMessageDialog(this, "Customer name cannot be empty.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
             }
@@ -194,6 +243,7 @@ public class BankGUI extends JFrame {
                 balance = Double.parseDouble(amountText);
             }
             if (balance < 0) {
+                 updateStatus("Initial balance cannot be negative.", true);
                  JOptionPane.showMessageDialog(this, "Initial balance cannot be negative.", "Error", JOptionPane.ERROR_MESSAGE);
                  return;
             }
@@ -201,80 +251,119 @@ public class BankGUI extends JFrame {
             BankAccount account = new BankAccount(accNum, name, balance);
             bankService.createAccount(account);
             txtDisplayArea.setText("Account created successfully for " + name + ".\n");
+            updateStatus("\u2713 Account created successfully.", false);
             JOptionPane.showMessageDialog(this, "Account Created successfully.");
         } catch (NumberFormatException ex) {
+            updateStatus("Invalid numeric values.", true);
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values for Account Number and Amount.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            updateStatus(ex.getMessage(), true);
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void deposit() {
+        setMode("Deposit");
         try {
             int accNum = Integer.parseInt(txtAccountNumber.getText().trim());
             double amount = Double.parseDouble(txtAmount.getText().trim());
             
             bankService.deposit(accNum, amount);
-            txtDisplayArea.setText("Deposited $" + amount + " to account " + accNum + " successfully.\n");
+            txtDisplayArea.setText("Deposited " + currencyFormat.format(amount) + " to account " + accNum + " successfully.\n");
+            updateStatus("\u2713 Deposit successful.", false);
             JOptionPane.showMessageDialog(this, "Deposit successful.");
         } catch (NumberFormatException ex) {
+            updateStatus("Invalid numeric values.", true);
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            updateStatus(ex.getMessage(), true);
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void withdraw() {
+        setMode("Withdraw");
         try {
             int accNum = Integer.parseInt(txtAccountNumber.getText().trim());
             double amount = Double.parseDouble(txtAmount.getText().trim());
             
             bankService.withdraw(accNum, amount);
-            txtDisplayArea.setText("Withdrew $" + amount + " from account " + accNum + " successfully.\n");
+            txtDisplayArea.setText("Withdrew " + currencyFormat.format(amount) + " from account " + accNum + " successfully.\n");
+            updateStatus("\u2713 Withdrawal successful.", false);
             JOptionPane.showMessageDialog(this, "Withdrawal successful.");
         } catch (NumberFormatException ex) {
+            updateStatus("Invalid numeric values.", true);
             JOptionPane.showMessageDialog(this, "Please enter valid numeric values.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            updateStatus(ex.getMessage(), true);
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void checkBalance() {
+        setMode("Balance Enquiry");
         try {
             int accNum = Integer.parseInt(txtAccountNumber.getText().trim());
             double balance = bankService.checkBalance(accNum);
-            txtDisplayArea.setText("Account Number: " + accNum + "\nCurrent Balance: $" + balance + "\n");
+            
+            StringBuilder sb = new StringBuilder();
+            sb.append("====================================\n");
+            sb.append("BALANCE ENQUIRY\n");
+            sb.append("====================================\n");
+            sb.append("Account Number : ").append(accNum).append("\n");
+            sb.append("Current Balance: ").append(currencyFormat.format(balance)).append("\n");
+            sb.append("====================================\n");
+            
+            txtDisplayArea.setText(sb.toString());
+            updateStatus("\u2713 Balance retrieved.", false);
         } catch (NumberFormatException ex) {
+            updateStatus("Invalid Account Number.", true);
             JOptionPane.showMessageDialog(this, "Please enter a valid Account Number.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            updateStatus(ex.getMessage(), true);
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
 
     private void showHistory() {
+        setMode("Transaction History");
         try {
             int accNum = Integer.parseInt(txtAccountNumber.getText().trim());
             List<Transaction> history = bankService.getTransactionHistory(accNum);
             
-            StringBuilder sb = new StringBuilder("Transaction History for Account: " + accNum + "\n");
-            sb.append("--------------------------------------------------\n");
+            StringBuilder sb = new StringBuilder();
+            sb.append("====================================\n");
+            sb.append("TRANSACTION HISTORY\n");
+            sb.append("====================================\n");
+            
             for (Transaction t : history) {
-                sb.append(t.getTransactionDate()).append(" | ")
-                  .append(t.getTransactionType()).append(" | $")
-                  .append(t.getAmount()).append("\n");
+                String type = t.getTransactionType();
+                sb.append(String.format("%-12s %s\n", type, historyCurrencyFormat.format(t.getAmount())));
             }
+            
+            sb.append("------------------------------------\n");
+            double balance = bankService.checkBalance(accNum);
+            sb.append("Current Balance : ").append(historyCurrencyFormat.format(balance)).append("\n");
+            sb.append("====================================\n");
+            
             txtDisplayArea.setText(sb.toString());
+            updateStatus("\u2713 Transaction history loaded.", false);
         } catch (NumberFormatException ex) {
+            updateStatus("Invalid Account Number.", true);
             JOptionPane.showMessageDialog(this, "Please enter a valid Account Number.", "Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
+            updateStatus(ex.getMessage(), true);
             JOptionPane.showMessageDialog(this, ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
         }
     }
     
     private void clearFields() {
+        setMode("Clear");
         txtAccountNumber.setText("");
         txtCustomerName.setText("");
         txtAmount.setText("");
         txtDisplayArea.setText("");
+        lblStatus.setText("Status: Ready");
+        lblStatus.setForeground(Color.BLACK);
     }
 }
